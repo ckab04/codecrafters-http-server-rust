@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::{BufRead, BufReader, Write};
 // Uncomment this block to pass the first stage
 use std::net::{TcpListener, TcpStream};
 
@@ -14,7 +14,7 @@ fn main() {
         match stream {
             Ok(stream) => {
                 println!("accepted new connection");
-                response_with_200(stream);
+                response_to_client(stream);
             }
             Err(e) => {
                 println!("error: {}", e);
@@ -24,7 +24,23 @@ fn main() {
 }
 
 
-fn response_with_200(mut stream: TcpStream){
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
-    let _ = stream.write_all(response.as_bytes()).expect("Error while responding to client");
+fn response_to_client(mut stream: TcpStream){
+    let response_200 = "HTTP/1.1 200 OK\r\n\r\n";
+    let response_400 = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+
+    let buf_reader = BufReader::new(&mut stream);
+    //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
+    let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
+
+    let path = start_line.split(" ").find(|&p| p == "/");
+    match path {
+        Some(_p) => {
+            let _ = stream.write_all(response_200.as_bytes()).expect("Error while responding to client");
+        }
+        None => {
+            let _ = stream.write_all(response_400.as_bytes()).expect("Error while responding to client");
+        }
+    }
+
+
 }
