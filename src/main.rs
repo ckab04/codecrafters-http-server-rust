@@ -8,7 +8,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     //
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:4222").unwrap();
 
     for stream in listener.incoming() {
         match stream {
@@ -33,7 +33,7 @@ fn response_to_client(mut stream: TcpStream){
     let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     println!("Start Line  : {:?}", start_line);
     // let path = start_line.split(" ").find(|&p| p == "/"); Answer of respond to with 404
-    let path = start_line.split(" ").find(|&p| p.contains("/echo/"));
+    let path = start_line.split(" ").find(|&p| p.contains("/"));
     println!("Path : {:?}", path);
     match path {
         Some(p) => {
