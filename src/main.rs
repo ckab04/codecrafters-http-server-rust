@@ -60,7 +60,10 @@ fn response_to_client(mut stream: TcpStream){
                 let user_agent = http_request.iter()
                     .find(|&value| value.starts_with("User-Agent")).expect("Could not get the user agent");
 
+                println!("User agen = {user_agent}");
+
                 let user_agent_value = user_agent.split(":").nth(1).expect("Could not get the value of the user agent");
+                println!("User agent value = {user_agent_value}");
                 let length = user_agent_value.trim_start().len();
                 let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{user_agent_value}");
                 write_response_to_client(&mut stream, my_response);
