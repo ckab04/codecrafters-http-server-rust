@@ -8,7 +8,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     //
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:4222").unwrap();
 
     for stream in listener.incoming() {
         match stream {
@@ -64,7 +64,8 @@ fn response_to_client(mut stream: TcpStream){
 
                 let user_agent_value = user_agent.split(":").nth(1).expect("Could not get the value of the user agent");
                 println!("User agent value = {user_agent_value}");
-                let length = user_agent_value.trim_start().len();
+                let user_agent_value = user_agent_value.trim_start();
+                let length = user_agent_value.len();
                 let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{user_agent_value}");
                 println!("Response : {my_response}");
                 write_response_to_client(&mut stream, my_response);
