@@ -8,7 +8,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
     //
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:4222").unwrap();
 
     for stream in listener.incoming() {
         match stream {
@@ -34,12 +34,13 @@ fn response_to_client(mut stream: TcpStream){
 
     // let path = start_line.split(" ").find(|&p| p == "/"); Answer of respond to with 404
     let path = start_line.split(" ").find(|&p| p.contains("/echo/"));
+    println!("Path : {:?}", path);
     match path {
         Some(p) => {
             let random_string_from_client = p.split("/").nth(2).expect("Could not split the request header");
             println!("Random String : {random_string_from_client}");
             let length = random_string_from_client.len();
-            let my_response = format!( "{response_200}\r\nContent-Type: text/plain\r\nContent-Length: {length}\r\n\r\n{random_string_from_client}");
+            let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string_from_client}");
             let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
         }
         None => {
