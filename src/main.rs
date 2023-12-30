@@ -30,7 +30,12 @@ fn response_to_client(mut stream: TcpStream){
 
     let buf_reader = BufReader::new(&mut stream);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
-    let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
+    let http_request: Vec<_> = buf_reader.lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+    //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
+    let start_line = http_request.get(0).expect("Error while getting the start line");
     println!("Start Line  : {:?}", start_line);
     // let path = start_line.split(" ").find(|&p| p == "/"); Answer of respond to with 404
     let path = start_line.split(" ").find(|&p| p.contains("/"));
@@ -51,6 +56,14 @@ fn response_to_client(mut stream: TcpStream){
                 let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string}");
                 //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
                 write_response_to_client(&mut stream,my_response);
+            }else if p.starts_with("/user-agent"){
+                let user_agent = http_request.iter()
+                    .find(|&value| value.starts_with("User-Agent")).expect("Could not get the user agent");
+
+                let user_agent_value = user_agent.split(":").nth(1).expect("Could not get the value of the user agent");
+                let length = user_agent_value.len();
+                let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{user_agent_value}");
+                write_response_to_client(&mut stream, my_response);
             }
             else{
                 write_response_to_client(&mut stream, response_400.to_string());
