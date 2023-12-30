@@ -40,20 +40,29 @@ fn response_to_client(mut stream: TcpStream){
             if p == "/"{
                 let _root_path = start_line.split(" ").find(|&p| p == "/").unwrap();
                 let my_response = format!( "{response_200}\r\n\r\n");
-                let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
+                //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
+                write_response_to_client(&mut stream, my_response);
             }
             else if p.starts_with("/echo/"){
                 let random_string_from_client = p.split("/").nth(2).expect("Could not split the request header");
                 println!("Random String : {random_string_from_client}");
                 let length = random_string_from_client.len();
                 let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string_from_client}");
-                let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
+                //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
+                write_response_to_client(&mut stream,my_response);
+            }
+            else{
+                write_response_to_client(&mut stream, response_400.to_string());
             }
         }
         None => {
-            let _ = stream.write_all(response_400.as_bytes()).expect("Error while responding to client");
+            write_response_to_client(&mut stream, response_400.to_string());
         }
     }
 
 
+}
+
+fn write_response_to_client(mut stream: &TcpStream, response: String){
+    let _ = stream.write_all(response.as_bytes()).expect("Error while responding to client");
 }
