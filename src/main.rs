@@ -37,6 +37,7 @@ fn response_to_client(mut stream: TcpStream){
     match path {
         Some(p) => {
             let random_string_from_client = p.split("/").nth(2).expect("Could not split the request header");
+            println!("Random String : {random_string_from_client}");
             let length = random_string_from_client.len();
             let my_response = format!( "{response_200}\r\nContent-Type: text/plain\r\nContent-Length: {length}\r\n\r\n{random_string_from_client}");
             let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
