@@ -1,7 +1,6 @@
+use std::io::Write;
 // Uncomment this block to pass the first stage
 use std::net::{TcpListener, TcpStream};
-use nom::AsBytes;
-use tokio::io::AsyncWriteExt;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -13,9 +12,9 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(mut stream) => {
+            Ok(stream) => {
                 println!("accepted new connection");
-                response_with_200(&mut stream);
+                response_with_200(stream);
             }
             Err(e) => {
                 println!("error: {}", e);
@@ -25,7 +24,7 @@ fn main() {
 }
 
 
-fn response_with_200(mut stream: &TcpStream){
+fn response_with_200(mut stream: TcpStream){
     let response = "HTTP/1.1 200 OK\r\n\r\n";
-    let _ = stream.write(response.as_bytes()).expect("Error while responding to client");
+    let _ = stream.write_all(response.as_bytes()).expect("Error while responding to client");
 }
