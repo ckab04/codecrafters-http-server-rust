@@ -31,7 +31,7 @@ fn response_to_client(mut stream: TcpStream){
     let buf_reader = BufReader::new(&mut stream);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
-
+    println!("Start Line  : {:?}", start_line);
     // let path = start_line.split(" ").find(|&p| p == "/"); Answer of respond to with 404
     let path = start_line.split(" ").find(|&p| p.contains("/echo/"));
     println!("Path : {:?}", path);
