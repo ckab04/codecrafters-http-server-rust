@@ -44,10 +44,11 @@ fn response_to_client(mut stream: TcpStream){
                 write_response_to_client(&mut stream, my_response);
             }
             else if p.starts_with("/echo/"){
-                let random_string_from_client = p.split("/").nth(2).expect("Could not split the request header");
-                println!("Random String : {random_string_from_client}");
-                let length = random_string_from_client.len();
-                let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string_from_client}");
+                //let random_string_from_client = p.split("/").nth(2).expect("Could not split the request header");
+                let random_string = &p[6..];
+                println!("Random String after echo: {random_string}");
+                let length = random_string.len();
+                let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string}");
                 //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
                 write_response_to_client(&mut stream,my_response);
             }
