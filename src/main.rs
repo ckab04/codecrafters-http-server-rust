@@ -66,6 +66,7 @@ fn response_to_client(mut stream: TcpStream){
                 println!("User agent value = {user_agent_value}");
                 let length = user_agent_value.trim_start().len();
                 let my_response = format!( "{response_200}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{user_agent_value}");
+                println!("Response : {my_response}");
                 write_response_to_client(&mut stream, my_response);
             }
             else{
