@@ -1,8 +1,7 @@
 use std::io::{BufRead, BufReader, Write};
 // Uncomment this block to pass the first stage
 use std::net::{TcpListener, TcpStream};
-use std::thread;
-use std::time::Duration;
+use std::{fs, thread};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -88,4 +87,18 @@ fn respond_with_content(mut stream: &TcpStream, start_line: &str, response: &str
     let my_response = format!( "{response}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{random_string}");
     //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
     write_response_to_client(&mut stream,my_response);
+}
+
+fn get_a_file(directory_path: String, start_line: String, response_status: &str){
+    let dir = fs::read_dir(directory_path).expect("Could not read the directory");
+    let filename = &start_line[6..];
+
+    for entry in dir{
+        let entry = entry.unwrap();
+        if entry.file_name().to_str().unwrap().contains(filename){
+            let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n{random_string}");
+
+        }
+    }
+
 }
