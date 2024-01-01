@@ -107,7 +107,9 @@ fn get_a_file(mut stream: &TcpStream,start_line: &String, response_status: &str)
         let file_name = my_file.expect("Could not get the file name").file_name().to_str().unwrap().to_string();
         let dir_path = Path::new(directory_path).join(file_name);
         let content = fs::read_to_string(dir_path).expect("Could not read the file");
-        let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\n\r\n{content}");
+        let length = content.len();
+        let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n{content}");
+        //let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\n\r\n{content}");
         write_response_to_client(&mut stream,my_response);
     }
     else{
