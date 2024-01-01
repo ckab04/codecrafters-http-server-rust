@@ -8,7 +8,7 @@ fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:4222").unwrap();
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
@@ -96,7 +96,8 @@ fn get_a_file(mut stream: &TcpStream,start_line: &String, response_status: &str)
     let cmd_args: Vec<String> = env::args().collect();
     let directory_path = &cmd_args[2];
     let mut dir = fs::read_dir(directory_path).expect("Could not read the directory");
-    let filename = &start_line[11..];
+    let fname = &start_line[11..];
+    let filename = fname.split(" ").nth(0).expect("Could not split the file name");
     println!("File name : {filename}");
 
     let my_file = dir.map(|result| result.unwrap())
