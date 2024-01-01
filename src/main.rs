@@ -8,7 +8,7 @@ fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
     // Uncomment this block to pass the first stage
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:4222").unwrap();
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
@@ -30,10 +30,31 @@ fn response_to_client(mut stream: TcpStream) {
 
     let buf_reader = BufReader::new(&mut stream);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
+    println!("Is it coming here ?");
     let http_request: Vec<_> = buf_reader.lines()
-        .map(|result| result.unwrap())
-       // .take_while(|line| !line.is_empty())
+        .filter(|value| {
+            println!("{:?}", value);
+            value.is_ok()
+        } )
+        .map(|result| {
+            if result.is_ok(){
+                println!("Able to unwrap");
+                result.unwrap()
+            }else if result.is_err(){
+                println!("UNABLE TO UNWRAP");
+                String::new()
+            }else{
+                println!("SOMETHING ELSE");
+                String::new()
+            }
+        })
+        .take_while(|line| {
+            println!("Length of the line : {}", line.len());
+            !line.is_empty()
+        })
         .collect();
+
+    println!("Http Request : {:#?}", http_request);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     let start_line = http_request.get(0).expect("Error while getting the start line");
     println!("Start Line  : {:?}", start_line);
@@ -48,6 +69,7 @@ fn response_to_client(mut stream: TcpStream) {
             if p == "/" {
                 let _root_path = start_line.split(" ").find(|&p| p == "/").unwrap();
                 let my_response = format!("{response_200}\r\n\r\n");
+                println!("First if statement");
                 //let _ = stream.write_all( my_response.as_bytes()).expect("Error while responding to client");
                 //thread::sleep(Duration::from_secs(30));
                 write_response_to_client(&mut stream, my_response);
