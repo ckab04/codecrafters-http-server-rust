@@ -32,7 +32,7 @@ fn response_to_client(mut stream: TcpStream) {
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     let http_request: Vec<_> = buf_reader.lines()
         .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
+       // .take_while(|line| !line.is_empty())
         .collect();
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     let start_line = http_request.get(0).expect("Error while getting the start line");
