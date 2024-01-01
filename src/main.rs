@@ -1,12 +1,12 @@
 use std::io::{BufRead, BufReader, Write};
 // Uncomment this block to pass the first stage
 use std::net::{TcpListener, TcpStream};
-use std::{fs, thread};
+use std::{env, fs, thread};
+use std::path::Path;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
-
     // Uncomment this block to pass the first stage
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
     for stream in listener.incoming() {
@@ -53,6 +53,8 @@ fn response_to_client(mut stream: TcpStream){
                 respond_with_content(&stream, p, response_200);
             }else if p.starts_with("/user-agent"){
                 user_agent(&stream, &http_request, response_200);
+            }else if p.starts_with("/files/"){
+                get_a_file(&stream,&start_line, response_200);
             }
             else{
                 write_response_to_client(&mut stream, response_400.to_string());
@@ -89,16 +91,35 @@ fn respond_with_content(mut stream: &TcpStream, start_line: &str, response: &str
     write_response_to_client(&mut stream,my_response);
 }
 
-fn get_a_file(directory_path: String, start_line: String, response_status: &str){
-    let dir = fs::read_dir(directory_path).expect("Could not read the directory");
-    let filename = &start_line[6..];
+fn get_a_file(mut stream: &TcpStream,start_line: &String, response_status: &str){
 
-    for entry in dir{
-        let entry = entry.unwrap();
-        if entry.file_name().to_str().unwrap().contains(filename){
-            let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n{random_string}");
+    let cmd_args: Vec<String> = env::args().collect();
+    let directory_path = &cmd_args[2];
+    let mut dir = fs::read_dir(directory_path).expect("Could not read the directory");
+    let filename = &start_line[11..];
+    println!("File name : {filename}");
 
-        }
+    let my_file = dir.map(|result| result.unwrap())
+        .find(|entry|  entry.file_name().to_str().unwrap().contains(filename));
+
+    if my_file.is_some(){
+        let file_name = my_file.expect("Could not get the file name").file_name().to_str().unwrap().to_string();
+        let dir_path = Path::new(directory_path).join(file_name);
+        let content = fs::read_to_string(dir_path).expect("Could not read the file");
+        let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\n\r\n{content}");
+        write_response_to_client(&mut stream,my_response);
     }
+    else{
+        let response_400 = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+        let my_response = format!( "{response_400}\r\n\r\n");
+        write_response_to_client(&mut stream,my_response);
+    }
+    // for entry in dir{
+    //     let entry = entry.unwrap();
+    //     if entry.file_name().to_str().unwrap().contains(filename){
+    //         let my_response = format!( "{response_status}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n{random_string}");
+    //
+    //     }
+    // }
 
 }
