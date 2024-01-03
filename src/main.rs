@@ -1,8 +1,9 @@
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Read, Write};
 // Uncomment this block to pass the first stage
 use std::net::{TcpListener, TcpStream};
 use std::{env, fs, thread};
 use std::path::Path;
+use std::str;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -28,30 +29,38 @@ fn response_to_client(mut stream: TcpStream) {
     let response_200 = "HTTP/1.1 200 OK";
     let response_400 = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 
-    let buf_reader = BufReader::new(&mut stream);
+    let mut buf_reader = BufReader::new(&mut stream);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     println!("Is it coming here ?");
-    let http_request: Vec<_> = buf_reader.lines()
-        .filter(|value| {
-            println!("{:?}", value);
-            value.is_ok()
-        } )
-        .map(|result| {
-            if result.is_ok(){
-                println!("Able to unwrap");
-                result.unwrap()
-            }else if result.is_err(){
-                println!("UNABLE TO UNWRAP");
-                String::new()
-            }else{
-                println!("SOMETHING ELSE");
-                String::new()
-            }
-        })
-        .take_while(|line| {
-            println!("Length of the line : {}", line.len());
-            !line.is_empty()
-        })
+    let mut buffer: Vec<u8> = vec![];
+    let size = buf_reader.read_to_end(&mut buffer);
+    //let http_request: Vec<_> = buf_reader.read_to_end();
+        // .lines()
+        // .filter(|value| {
+        //     println!("{:?}", value);
+        //     value.is_ok()
+        // } )
+        // .map(|result| {
+        //     if result.is_ok(){
+        //         println!("Able to unwrap");
+        //         result.unwrap()
+        //     }else if result.is_err(){
+        //         println!("UNABLE TO UNWRAP");
+        //         String::new()
+        //     }else{
+        //         println!("SOMETHING ELSE");
+        //         String::new()
+        //     }
+        // })
+        // .take_while(|line| {
+        //     println!("Length of the line : {}", line.len());
+        //     !line.is_empty()
+        // })
+        // .collect();
+
+    let content = str::from_utf8(&buffer).unwrap().to_string();
+    let http_request: Vec<String> = content.lines()
+        .map(|res| res.to_string())
         .collect();
 
     println!("Http Request : {:#?}", http_request);
@@ -149,6 +158,20 @@ fn get_a_file(mut stream: &TcpStream,start_line: &String, response_status: &str)
 }
 
 fn post_a_file(mut stream: &TcpStream, http_request: &Vec<String>){
+
+    /*
+    [stage-8] Sending request: (Messages with >>> prefix are part of this log)
+[stage-8] >>> POST /files/scooby_donkey_vanilla_donkey HTTP/1.1
+[stage-8] >>> Host: localhost:4221
+[stage-8] >>> User-Agent: Go-http-client/1.1
+[stage-8] >>> Content-Length: 53
+[stage-8] >>> Accept-Encoding: gzip
+[stage-8] >>>
+[stage-8] >>> yikes monkey Monkey dooby yikes humpty vanilla monkey
+
+
+
+     */
     let cmd_args: Vec<String> = env::args().collect();
     let directory_path = &cmd_args[2];
     let start_line = &http_request[0];
