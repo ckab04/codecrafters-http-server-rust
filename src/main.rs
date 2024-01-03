@@ -29,11 +29,14 @@ fn response_to_client(mut stream: TcpStream) {
     let response_200 = "HTTP/1.1 200 OK";
     let response_400 = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 
+
     let mut buf_reader = BufReader::new(&mut stream);
     //let start_line = buf_reader.lines().next().expect("Request not found").expect("There was an error on the request");
     println!("Is it coming here ?");
     let mut buffer: Vec<u8> = vec![];
-    let size = buf_reader.read_to_end(&mut buffer);
+    let buffer = buf_reader.fill_buf().unwrap();
+    //println!("Size : {:?}", size);
+    println!("{:?}", str::from_utf8(&buffer));
     //let http_request: Vec<_> = buf_reader.read_to_end();
         // .lines()
         // .filter(|value| {
